@@ -47,17 +47,17 @@ cv2.setMouseCallback("image", draw)
 while(1):
     cv2.imshow("image", img1)
     k = cv2.waitKey(1) & 0xFF
-    if k == ord('q'):
+    if k == ord('q'): #press 'q' to exit window
         break
-    elif k == ord('p'):
+    elif k == ord('p'): #press 'p' to predict
         img2 = img1 / 255.0
         img2 = cv2.resize(img2, (28, 28), cv2.INTER_AREA)
         img2 = img2.reshape(1, 28, 28)        
         pr = model.predict_classes(img2)
         print(pr)
-    elif k == ord('c'):
+    elif k == ord('c'): #press 'c' to clear the canvas
         img1 = np.zeros((512, 512, 1), np.uint8)
-    elif k == ord('s'):
+    elif k == ord('s'): #press 's' to save figure
         img2 = cv2.resize(img1, (28, 28), cv2.INTER_AREA)
         cv2.imwrite('my_fig.png', img2)
 cv2.destroyAllWindows() 
