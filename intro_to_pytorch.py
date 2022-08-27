@@ -1,4 +1,4 @@
-####Code copied from lecture slides on Computer Vision by Justin Johnson
+####Code copied from lecture slides on Computer Vision by Justin Johnson, University of Michigan
 
 import torch
 
