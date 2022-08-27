@@ -4,7 +4,7 @@ import torch
 
 
 ######################################
-basic version
+#basic version
 ######################################
 device = torch.device('cpu')
 N, D_in, H, D_out = 64, 1000, 100, 10
@@ -31,7 +31,7 @@ for t in range(500):
     print(w1)
 
 ######################################
-1st improvement
+#1st improvement
 ######################################
 
 device = torch.device('cpu')
@@ -59,7 +59,7 @@ for t in range(500):
         w2.grad.zero_()    
         
 ######################################
-instability
+#instability
 ######################################        
 def sigmoid(x):
     return 1.0 / (1.0 + (-x).exp())
@@ -89,7 +89,7 @@ for t in range(500):
         w2.grad.zero_()
 
 ######################################
-improvement
+#improvement
 ######################################
 class Sigmoid(torch.autograd.Function):
     @staticmethod
@@ -131,7 +131,7 @@ for t in range(5000):
         w2.grad.zero_()    
 
 ######################################
-2nd improvement
+#2nd improvement
 ######################################
 device = torch.device('cpu')
 N, D_in, H, D_out = 64, 1000, 100, 10
@@ -157,3 +157,81 @@ for t in range(5000):
         
     optimizer.step()
     optimizer.zero_grad()        
+
+device = torch.device('cpu')
+
+######################################
+#custom modules
+######################################
+class TwoLayerNet(torch.nn.Module):
+    def __init__(self,D_in, H, D_out):
+        super(twoLayerNet, self).__init__()
+        self.linear1 = torch.nn.Linear(D_in, H)
+        self.linear2 = torch.nn.Linear(H, D_out)
+        
+    def forward(self, x):
+        h_relu = self.linear1(x).clamp(min=0)
+        y_pred = self.linear2(h_relu)
+        return y_pred
+
+N, D_in, H, D_out = 64, 1000, 100, 10
+x = torch.randn(N, D_in)
+y = torch.randn(N, D_out)
+
+learning_rate = 1e-6
+optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
+for t in range(5000):
+
+    y_pred = model(x)
+    loss = torch.nn.functional.mse_loss(y_pred, y)
+    
+    loss.backward()
+    if t%50 == 0 :
+        print(t, loss.item())
+        
+    optimizer.step()
+    optimizer.zero_grad()    
+    
+    
+ device = torch.device('cpu')
+
+
+######################################
+#parallel block, don't do this
+######################################
+class ParallelBlock(torch.nn.Module):
+    def __init__(self, D_in, D_out):
+        super(ParallelBlock, self).__init__()
+        self.linear1 = torch.nn.Linear(D_in, D_out)
+        self.linear2 = torch.nn.Linear(D_in, D_out)
+        
+    def forward(self, x):
+        h1 = self.linear1(x)
+        h2 = self.linear2(x)
+        return (h1 * h2).clamp(min = 0)
+    
+N, D_in, H, D_out = 64, 1000, 100, 10
+x = torch.randn(N, D_in)
+y = torch.randn(N, D_out)
+
+model = torch.nn.Sequential(
+    ParallelBlock(D_in, H),
+    ParallelBlock(H, H),
+    torch.nn.Linear(H, D_out)
+)
+
+
+learning_rate = 1e-6
+optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
+
+for t in range(5000):
+
+    y_pred = model(x)
+    loss = torch.nn.functional.mse_loss(y_pred, y)
+    
+    loss.backward()
+    if t%50 == 0 :
+        print(t, loss.item())
+        
+    optimizer.step()
+    optimizer.zero_grad()   
