@@ -1,3 +1,5 @@
+####Code copied from lecture slides on Computer Vision by Justin Johnson
+
 import torch
 
 
